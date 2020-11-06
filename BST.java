@@ -49,7 +49,23 @@ public class BST<C extends Comparable<C>>{
 	visit();		
     }
     
-    public void breadthFirst() { /* across the depths*/   }
+    public void breadthFirst() { /* across the depths*/
+	ArrayList<BST<C>> q = new ArrayList<BST<C>>();
+	q.add(this);
+	int i = 0;
+	
+	while (i < q.size()){
+	    BST<C> curr = q.get(i);
+	    if (curr.hasLeft()) q.add(curr.getLeft());
+	    if (curr.hasRight()) q.add(curr.getRight());
+	    i++;
+	}
+
+	for (i = 0;i < q.size(); i++){
+	    q.get(i).visit();
+	}
+
+    }
     
     public boolean contains(C elt){
 	BST<C> root = this;
@@ -116,7 +132,7 @@ public class BST<C extends Comparable<C>>{
 		return true;
 	    }
 	    else{ //no children
-		this = null;
+		this.setElement(null);
 		return true;
 	    }
 
@@ -128,18 +144,25 @@ public class BST<C extends Comparable<C>>{
 
     
     private boolean removeHelper(C elt, BST<C> parent){
+	//	System.out.println("Starting recursion, parent = " + parent.getElement());
+	//	System.out.println("current = " + this.getElement());
 	// found the thing and two child situation
 	if (this.getElement().compareTo(elt) == 0 && this.hasTwoChildren()){
 	    //swap with smallest on right
 	    C temp = this.getElement();
 	    BST<C> toSwap = smallestOnRight();
+	    System.out.println("ToSwap: " + toSwap.getElement());
 	    this.setElement(toSwap.getElement());
 	    toSwap.setElement(temp);
+	    System.out.println("current: " + this.getElement());
+	    System.out.println("current's children");
+	    this.inOrder();
+	    
 	    return this.getRight().removeHelper(elt, this);
 	}
 	else if (this.getElement().compareTo(elt) == 0 && this.hasRight() && !this.hasLeft()){
 	    //need to know which child this is of parent's
-	    if (this.getElement().compareTo(parent.getElement()) < 0){ // this is left of parent
+	    if (this.getElement().compareTo(parent.getLeft().getElement())==0){ 
 		parent.setLeft(this.getRight());
 		return true;
 	    }
@@ -151,7 +174,7 @@ public class BST<C extends Comparable<C>>{
 	}
 	else if (this.getElement().compareTo(elt) == 0 && this.hasLeft()){
 	    //need to know which child this is of parent's
-	    if (this.getElement().compareTo(parent.getElement()) < 0){ // this is left of parent
+	    if (this.getElement().compareTo(parent.getLeft().getElement()) == 0){ 
 		parent.setLeft(this.getLeft());
 		return true;
 	    }
@@ -161,6 +184,18 @@ public class BST<C extends Comparable<C>>{
 	    }
 	}
 	//found it and its a leaf
+	else if (this.getElement().compareTo(elt) == 0 && !this.hasChildren()){
+	    if (this.getElement().compareTo(parent.getLeft().getElement()) == 0)
+		parent.setLeft(null);
+	    else parent.setRight(null);
+	    return true;
+	}
+	else if (this.getElement().compareTo(elt) > 0 && this.hasLeft()){ //go left
+	    return this.getLeft().removeHelper(elt, this);
+	}
+	else if (this.getElement().compareTo(elt) < 0 && this.hasRight()){
+	    return this.getRight().removeHelper(elt, this);
+	}
 	//haven't found it yet
 
 	return false;   }
@@ -173,8 +208,11 @@ public class BST<C extends Comparable<C>>{
 	tree.add(2);
 	tree.add(4);
 	tree.add(1);
+	
+	tree.inOrder();
+	tree.breadthFirst();
 
-	tree.postOrder();
+	
 
 	
     }
